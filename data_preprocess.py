@@ -23,6 +23,7 @@ class DataTransformer:
         test_ds = pd.read_csv('data/test_dataset.csv')
         try:
             close_test_ds = pd.read_csv(path)
+            close_test_ds = close_test_ds[close_test_ds['date']>='2023-08-01']
             train_ds = pd.concat([train_ds, test_ds, close_test_ds])
 
             close_test_begin = pd.to_datetime(close_test_ds['date']).min()
@@ -34,7 +35,7 @@ class DataTransformer:
         
         except:
             print("Файл не найден, попробуйте еще раз")
-            exit()
+            #exit()
 
             train_ds = pd.concat([train_ds, test_ds])
 
