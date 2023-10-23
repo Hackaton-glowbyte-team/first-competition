@@ -6,7 +6,16 @@ class DataTransformer:
     def __init__(self):
         pass
 
-    # Ваши другие функции здесь...
+    def features_interval(self, features, target, date1, date2):
+        """
+        Функция для выделения временных интервалов из таблиц признаков и целей
+        на этом этапе отбрасываем колонку 'date'
+        """
+        features_interval = features[ (features['date']>=date1) & (features['date']<date2) ]
+        target_interval = target[features_interval.index]
+        features_interval = features_interval.drop('date', axis=1)
+        
+        return features_interval, target_interval
 
     def open_file(self, path=None):
         # читаем исходные датасеты и складываем в один
@@ -73,9 +82,9 @@ class DataTransformer:
         return df
 
     def holydays(self, train_ds):
-
-        # Добавление данных о праздниках из файла 'data/holidays.csv'
-
+        """
+        Добавление данных о праздниках из файла 'data/holidays.csv'
+        """
         df_holidays = pd.read_csv('data/holidays.csv')
         df_holidays['date'] = pd.to_datetime(df_holidays['date'])
 
@@ -111,6 +120,7 @@ class DataTransformer:
         # заполняем пропущенные значения в столбцах с лагами
         for lag in lags:
             train_ds[f'target_lag_{lag}'].fillna(0, inplace=True)
+        
         return train_ds
 
     def add_vvp2(self, data, file_source='data/VVP.csv'):
@@ -187,7 +197,7 @@ class DataTransformer:
         data = self.fill_weather_columns(data)
         data = self.holydays(data)
         data = self.create_lags(data)
-        # data = self.add_vvp2(data)
+        data = self.add_vvp2(data)
         data = self.add_true_weather(data)
 
         return data
