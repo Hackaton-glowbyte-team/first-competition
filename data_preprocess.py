@@ -31,7 +31,11 @@ class DataTransformer:
             print('начало закрытого теста:', close_test_begin, '    конец закрытого теста:', close_test_end)
 
             return train_ds, close_test_begin, close_test_end
+        
         except:
+            print("Файл не найден, попробуйте еще раз")
+            exit()
+
             train_ds = pd.concat([train_ds, test_ds])
 
             # запоминаем дату начала тестовых данных, потом также поступим и с закрытым датасетом
