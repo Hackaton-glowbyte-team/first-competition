@@ -29,7 +29,7 @@ class DataTransformer:
             close_test_begin = pd.to_datetime(close_test_ds['date']).min()
             close_test_end = pd.to_datetime(close_test_ds['date']).max() + pd.to_timedelta(1,'d')
 
-            print('начало закрытого теста:', close_test_begin, '    конец закрытого теста:', close_test_end)
+        
             
             return train_ds, close_test_begin, close_test_end
         
@@ -178,7 +178,7 @@ class DataTransformer:
             list_fact_columns.remove('date_tw')
             new_df = df.copy()
             for column in list_fact_columns:
-                print(column)
+                
                 new_df[column] = new_df[column].shift(timeshift)
 
             return new_df
@@ -190,31 +190,25 @@ class DataTransformer:
         df_true_weather['WW'] = df_true_weather['WW'].apply(true_weather_WW_replace)
         df_true_weather['date'] = pd.to_datetime(df_true_weather['date'])
         df_true_weather = df_true_weather.rename(columns={'date':'date_tw'})
-        print('true wether before shift',df_true_weather["date_tw"].max())
+        
         # Применяем сдвиг на сутки, чтобы не заглядывать в будущее
         df_true_weather = shift_features_fact(df_true_weather)
-        print('true wether after shift',df_true_weather["date_tw"].max())
+       
         # Добавляем в датасет
         train_ds['date_hours'] = train_ds.apply(row_plus_hours_to_index, axis=1)
         train_ds = train_ds.merge(df_true_weather,how='left', left_on='date_hours', right_on='date_tw')
         train_ds = train_ds.drop(['date_hours', 'date_tw'], axis=1)
-        print(f'IS NAN {train_ds["WW"].isna().sum()}')
+      
         return train_ds
 
     def transform(self, data):
-        print(f'В начале {data["date"].max()}')
+       
         data = self.date_transform(data)
-        print(f'В date_transform {data["date"].max()}')
         data = self.fill_weather_columns(data)
-        print(f'В fill_weather_columns {data["date"].max()}')
         data = self.holydays(data)
-        print(f'В holydays {data["date"].max()}')
         data = self.create_lags(data)
-        print(f'В create_lags {data["date"].max()}')
         data = self.add_vvp2(data)
-        print(f'В add_vvp2 {data["date"].max()}')
         data = self.add_true_weather(data)
-        print(f'В add_true_weather {data["date"].max()}')
 
         return data
 
