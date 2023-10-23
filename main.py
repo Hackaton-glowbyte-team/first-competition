@@ -43,6 +43,9 @@ for name in drop_list:
 features = all_ds[feature_cols]
 target = all_ds['target']
 
+print(features.columns)
+print(all_ds.columns)
+
 # готовим учебный и тестовый датасеты
 features_all_train, target_all_train = transformer.features_interval(features, target, '2019-01-01', test_begin)
 features_test, target_test = transformer.features_interval(features, target, test_begin, test_end)
