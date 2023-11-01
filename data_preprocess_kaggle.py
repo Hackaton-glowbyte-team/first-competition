@@ -3,7 +3,8 @@ import pandas as pd
 import re
 
 class DataTransformer:
-    def __init__(self):
+    def __init__(self, path_ds):
+        self.path_ds = path_ds
         pass
 
     def features_interval(self, features, target, date1, date2):
@@ -30,10 +31,10 @@ class DataTransformer:
         
         return features_interval, target_interval
 
-    def open_file(self, path_ds=None, path_test=None):
+    def open_file(self, path_test=None):
         # читаем исходные датасеты и складываем в один
-        train_ds = pd.read_csv(path_ds +'/'+ 'train_dataset.csv')
-        test_ds = pd.read_csv(path_ds +'/' + 'test_dataset.csv')
+        train_ds = pd.read_csv(self.path_ds +'/'+ 'train_dataset.csv')
+        test_ds = pd.read_csv(self.path_ds +'/' + 'test_dataset.csv')
         try:
             close_test_ds = pd.read_csv(path_test)
             close_test_ds = close_test_ds[close_test_ds['date']>='2023-08-01']
@@ -61,11 +62,11 @@ class DataTransformer:
     def date_transform(self, train_ds):
         # преобразуем дату и делаем из нее колонки
         train_ds['date'] = pd.to_datetime(train_ds['date'])
-        #train_ds['year'] = train_ds['date'].dt.year
-        #train_ds['month'] = train_ds['date'].dt.month
-        #train_ds['day_of_week'] = train_ds['date'].dt.dayofweek
-        #train_ds['day'] = train_ds['date'].dt.day
-        #train_ds['day_of_year'] = train_ds['date'].dt.dayofyear
+        train_ds['year'] = train_ds['date'].dt.year
+        train_ds['month'] = train_ds['date'].dt.month
+        train_ds['day_of_week'] = train_ds['date'].dt.dayofweek
+        train_ds['day'] = train_ds['date'].dt.day
+        train_ds['day_of_year'] = train_ds['date'].dt.dayofyear
 
         return train_ds
 
@@ -102,7 +103,7 @@ class DataTransformer:
         """
         Добавление данных о праздниках из файла 'holidays.csv'
         """
-        df_holidays = pd.read_csv('holidays.csv')
+        df_holidays = pd.read_csv(self.path_ds +'/'+'holidays.csv')
         df_holidays['date'] = pd.to_datetime(df_holidays['date'])
 
         # Assuming df_holidays and train_ds are your dataframes
@@ -140,12 +141,15 @@ class DataTransformer:
         
         return train_ds
 
-    def add_vvp2(self, data, file_source='VVP.csv'):
+    def add_vvp2(self, data, file_source=None):
     
         """
         Функция добавляет данные о ВВП из файла 'VVP.csv' в датасет
         сырой датафрем подаем на вход
+        
         """
+        if file_source is None:
+            file_source = self.path_ds + '/' + 'VVP.csv'
         # обработаем файл с динамикой ВВП
         vvp = pd.read_csv(file_source)
         # преобразуем дату файла-источника в формат datetime64 и дропнем один столбик
@@ -196,7 +200,7 @@ class DataTransformer:
             return new_df
 
         # Читаем файл с архивом фактической погоды
-        df_true_weather = pd.read_csv('preprocessing_loaded_table.csv')
+        df_true_weather = pd.read_csv(self.path_ds +'/'+'preprocessing_loaded_table.csv')
 
         # Форматируем колонки
         df_true_weather['WW'] = df_true_weather['WW'].apply(true_weather_WW_replace)
