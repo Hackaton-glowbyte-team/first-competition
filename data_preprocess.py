@@ -91,18 +91,18 @@ class DataTransformer:
         """
         df_holidays = pd.read_csv('data/holidays.csv')
         df_holidays['date'] = pd.to_datetime(df_holidays['date'])
-
+        
         # Assuming df_holidays and train_ds are your dataframes
         train_ds = pd.merge(train_ds, df_holidays, on='date', how='left')
-
+        
         # Fill NaN values with 0
         train_ds['holidays'].fillna(0, inplace=True)
         train_ds['preholidays'].fillna(0, inplace=True)
-
+        
         # Convert to int
         train_ds['holidays'] = train_ds['holidays'].astype(int)
         train_ds['preholidays'] = train_ds['preholidays'].astype(int)
-        
+
         return train_ds
 
     def create_lags(self, train_ds):
@@ -203,11 +203,23 @@ class DataTransformer:
     def transform(self, data):
        
         data = self.date_transform(data)
+        duplicates = data.duplicated(keep=False)
+        print('date: ', duplicates.sum())
         data = self.fill_weather_columns(data)
+        duplicates = data.duplicated(keep=False)
+        print('fill_weather_columns: ', duplicates.sum())
         data = self.holydays(data)
+        duplicates = data.duplicated(keep=False)
+        print('holydays: ', duplicates.sum())
         data = self.create_lags(data)
+        duplicates = data.duplicated(keep=False)
+        print('create_lags: ', duplicates.sum())
         data = self.add_vvp2(data)
+        duplicates = data.duplicated(keep=False)
+        print('VVP: ', duplicates.sum())
         data = self.add_true_weather(data)
+        duplicates = data.duplicated(keep=False)
+        print('true weather: ', duplicates.sum())
 
         return data
 
