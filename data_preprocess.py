@@ -37,6 +37,8 @@ class DataTransformer:
             return train_ds, close_test_begin, close_test_end
         
         except:
+            print("Файл не найден, попробуйте еще раз")
+            exit()
 
             train_ds = pd.read_csv('data/train_dataset.csv')
             test_ds = pd.read_csv('data/test_dataset.csv')
