@@ -5,8 +5,12 @@ import datetime
 import lightgbm as lgb
 import sys
 import re
+
+import xgboost as xgb
+from xgboost import XGBRegressor
  
 from data_preprocess import DataTransformer
+NUM_ITERATIONS = 5000
 random_state = 12345
 
 
@@ -51,16 +55,37 @@ features_all_train, target_all_train = transformer.features_interval(features, t
 features_test, target_test = transformer.features_interval(features, target, test_begin, test_end)
 
 
-# Здесь обучаем на всех данных, которые были нам предоставлены 
-lgbm_model_all_train = lgb.LGBMRegressor(num_leaves=15, learning_rate=0.02, num_iterations=10000, 
-                               feature_fraction=0.987, random_state=random_state, objective='regression_l1', n_jobs=-1)
-lgbm_model_all_train.fit(features_all_train, target_all_train)
+feat_lgbm_test = features_test
 
 
-predict = lgbm_model_all_train.predict(features_test)
-predict_result = pd.DataFrame( features.loc[features_test.index, 'date'] )
+lgbm_model_all_train = lgb.Booster(model_file='models/lgb_model_Aug_32_alpha_3_summer_FULL ds No AUG.txt')
+
+l_predict_test = lgbm_model_all_train.predict(feat_lgbm_test)
+
+drop_list = ['preholidays_true',
+            ]
+n_values = range(1, 24)
+preholidays = ['preholidays_true_{}'.format(n) for n in n_values]
+drop_list = drop_list + preholidays
+
+feat_xgb_test = features_test.drop(columns=drop_list)
+
+
+
+xgb_model_all_train = XGBRegressor()
+# загружаем модель из файла
+xgb_model_all_train.load_model('models/xgb_modelbase feature_3.json')
+
+xgb_predict_test = xgb_model_all_train.predict(feat_xgb_test)
+
+predict = (xgb_predict_test + l_predict_test)/2
+
+predict_result = pd.DataFrame( )
+
+datetimes = train_ds.loc[features_test.index, 'date'] + pd.to_timedelta(train_ds.loc[features_test.index, 'time'], 'H')
+predict_result['datetime'] = datetimes.values
 predict_result['predict'] = predict
-predict_result = predict_result.groupby(by='date').sum().reset_index()
+predict_result.reset_index(drop=True)
 
 predict_result.to_csv('predict_result.csv', index=False)
 

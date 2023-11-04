@@ -20,21 +20,24 @@ class DataTransformer:
 
     def open_file(self, path=None):
         # читаем исходные датасеты и складываем в один
-        train_ds = pd.read_csv('data/train_dataset.csv')
-        test_ds = pd.read_csv('data/test_dataset.csv')
-        try:
-            close_test_ds = pd.read_csv(path)
-            close_test_ds = close_test_ds[close_test_ds['date']>='2023-08-01']
-            train_ds = pd.concat([train_ds, test_ds, close_test_ds])
 
-            close_test_begin = pd.to_datetime(close_test_ds['date']).min()
-            close_test_end = pd.to_datetime(close_test_ds['date']).max() + pd.to_timedelta(1,'d')
+        try:
+            print('i am here')
+            close_test_ds = pd.read_csv(path)
+        
+            train_ds = close_test_ds
+
+            close_test_begin = pd.to_datetime('2023-08-01')
+            close_test_end = pd.to_datetime('2023-09-30') + pd.to_timedelta(1,'d')
 
         
             
             return train_ds, close_test_begin, close_test_end
         
         except:
+
+            train_ds = pd.read_csv('data/train_dataset.csv')
+            test_ds = pd.read_csv('data/test_dataset.csv')
 
 
             train_ds = pd.concat([train_ds, test_ds])
@@ -253,9 +256,9 @@ class DataTransformer:
     def transform(self, data):
        
         data = self.date_transform(data)
-        data = self.fill_weather_columns(data)
         data = self.holydays(data)
         data = self.create_lags(data)
+        data = self.fill_weather_columns(data)
         data = self.add_vvp2(data)
         data = self.add_true_weather(data)
         data = self.mean_hour(data)
