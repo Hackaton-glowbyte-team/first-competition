@@ -8,6 +8,8 @@ import re
 
 import xgboost as xgb
 from xgboost import XGBRegressor
+import warnings
+warnings.filterwarnings('ignore')
  
 from data_preprocess import DataTransformer
 NUM_ITERATIONS = 5000
@@ -47,28 +49,21 @@ for name in drop_list:
 features = all_ds[feature_cols]
 target = all_ds['target']
 
-print(features.columns)
-print(all_ds.columns)
-
 # готовим учебный и тестовый датасеты
-features_all_train, target_all_train = transformer.features_interval(features, target, '2019-01-01', test_begin)
+
 features_test, target_test = transformer.features_interval(features, target, test_begin, test_end)
 
 
 feat_lgbm_test = features_test
 
-
-lgbm_model_all_train = lgb.Booster(model_file='models/lgb_model_Aug_32_alpha_3_summer_FULL ds No AUG.txt')
+lgbm_model_all_train = lgb.Booster(model_file='models/lgb_model_FULL_ds_no_aug.txt')
 
 l_predict_test = lgbm_model_all_train.predict(feat_lgbm_test)
 
-drop_list = ['preholidays_true',
-            ]
-n_values = range(1, 24)
-preholidays = ['preholidays_true_{}'.format(n) for n in n_values]
-drop_list = drop_list + preholidays
 
-feat_xgb_test = features_test.drop(columns=drop_list)
+
+
+feat_xgb_test = features_test[transformer.xgb_feat]
 
 
 
@@ -82,7 +77,7 @@ predict = (xgb_predict_test + l_predict_test)/2
 
 predict_result = pd.DataFrame( )
 
-datetimes = train_ds.loc[features_test.index, 'date'] + pd.to_timedelta(train_ds.loc[features_test.index, 'time'], 'H')
+datetimes = all_ds.loc[features_test.index, 'date'] + pd.to_timedelta(all_ds.loc[features_test.index, 'time'], 'H')
 predict_result['datetime'] = datetimes.values
 predict_result['predict'] = predict
 predict_result.reset_index(drop=True)
