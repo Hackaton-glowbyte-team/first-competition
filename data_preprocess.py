@@ -212,7 +212,41 @@ class DataTransformer:
         
         return train_ds
     
-    def feature_window(self, data)
+    def feature_window(self, train_ds):
+        
+        FEATURE_WINDOW_SIZE = 24
+        
+        feature_cols_no_date = = list(train_ds.columns)
+        feature_cols_no_date.remove('date')
+
+        drop_list = ['target', 
+                     'day_of_year', 
+                     'weather_pred', 
+                     'weather_fact', 
+                     'temp',
+                     'target_lag_48', 
+                     'target_lag_168']
+        
+        for name in drop_list:
+            feature_cols_no_date.remove(name)
+
+
+        for lag in range(1,FEATURE_WINDOW_SIZE):
+            for column in feature_cols_no_date:
+                train_ds[column+'_'+str(lag)] = train_ds[column].shift(lag)
+
+        return train_ds
+    
+    def  lag_for_hours(self, train_ds):
+
+        target_lags=[1, 5, 9]
+
+        for lag in target_lags:
+            train_ds['target_'+str(lag)] = train_ds['target'].shift(lag).where(train_ds['time']<lag, np.NaN)
+            train_ds['temp_'+str(lag)] = train_ds['temp'].shift(lag).where(train_ds['time']<lag, np.NaN)
+
+        return train_ds
+    
 
 
     def transform(self, data):
@@ -224,7 +258,8 @@ class DataTransformer:
         data = self.add_vvp2(data)
         data = self.add_true_weather(data)
         data = self.mean_hour(data)
-
+        data = self.feature_window(data)
+        data = self.lag_for_hours(data)
         return data
 
 
