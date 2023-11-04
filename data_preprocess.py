@@ -34,8 +34,7 @@ class DataTransformer:
             return train_ds, close_test_begin, close_test_end
         
         except:
-            print("Файл не найден, попробуйте еще раз")
-            exit()
+
 
             train_ds = pd.concat([train_ds, test_ds])
 
@@ -90,20 +89,20 @@ class DataTransformer:
         """
         Добавление данных о праздниках из файла 'data/holidays.csv'
         """
-        df_holidays = pd.read_csv('data/holidays.csv')
-        df_holidays['date'] = pd.to_datetime(df_holidays['date'])
-
-        # Assuming df_holidays and train_ds are your dataframes
-        train_ds = pd.merge(train_ds, df_holidays, on='date', how='left')
-
-        # Fill NaN values with 0
-        train_ds['holidays'].fillna(0, inplace=True)
-        train_ds['preholidays'].fillna(0, inplace=True)
-
-        # Convert to int
-        train_ds['holidays'] = train_ds['holidays'].astype(int)
-        train_ds['preholidays'] = train_ds['preholidays'].astype(int)
+        df_holidays_true = pd.read_csv('data/holidays_true.csv')
+        df_holidays_true['date'] = pd.to_datetime(df_holidays_true['date']))
         
+        # Assuming df_holidays and train_ds are your dataframes
+        train_ds = pd.merge(train_ds, df_holidays_true, on='date', how='left')
+        
+        # Fill NaN values with 0
+        train_ds['holidays_true'].fillna(0, inplace=True)
+        train_ds['preholidays_true'].fillna(0, inplace=True)
+        
+        # Convert to int
+        train_ds['holidays_true'] = train_ds['holidays_true'].astype(int)
+        train_ds['preholidays_true'] = train_ds['preholidays_true'].astype(int)
+
         return train_ds
 
     def create_lags(self, train_ds):
@@ -200,6 +199,21 @@ class DataTransformer:
         train_ds = train_ds.drop(['date_hours', 'date_tw'], axis=1)
       
         return train_ds
+    
+    def mean_hour(self, train_ds):
+        def mean_evening(values, evening=19):
+            return values[evening:].mean()
+
+        evening_slices = [0, 19, 22]
+            
+        for evening_slice in evening_slices:
+            train_ds[['last_evening_avg_target_'+str(evening_slice), 'last_evening_avg_temp_'+str(evening_slice)]] = \
+                train_ds[['date', 'target', 'temp']].groupby(by='date').transform(mean_evening, evening=evening_slice).shift(24)
+        
+        return train_ds
+    
+    def feature_window(self, data)
+
 
     def transform(self, data):
        
@@ -209,6 +223,7 @@ class DataTransformer:
         data = self.create_lags(data)
         data = self.add_vvp2(data)
         data = self.add_true_weather(data)
+        data = self.mean_hour(data)
 
         return data
 
