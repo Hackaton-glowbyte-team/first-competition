@@ -69,7 +69,7 @@ feat_xgb_test = features_test[transformer.xgb_feat]
 
 xgb_model_all_train = XGBRegressor()
 # загружаем модель из файла
-xgb_model_all_train.load_model('models/xgb_modelbase feature_3.json')
+xgb_model_all_train.load_model('models/xgb_model_FULL_ds_no_aug.json')
 
 xgb_predict_test = xgb_model_all_train.predict(feat_xgb_test)
 
