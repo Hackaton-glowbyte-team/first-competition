@@ -62,8 +62,12 @@ l_predict_test = lgbm_model_all_train.predict(feat_lgbm_test)
 
 
 
+drop_list = ['preholidays_true']
+n_values = range(1, 24)
+preholidays = ['preholidays_true_{}'.format(n) for n in n_values]
+drop_list = drop_list + preholidays
 
-feat_xgb_test = features_test[transformer.xgb_feat]
+feat_xgb_test = feat_xgb_test = features_test.drop(columns=drop_list)   #features_test[transformer.xgb_feat]
 
 
 
