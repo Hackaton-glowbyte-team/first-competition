@@ -48,11 +48,11 @@ class DataTransformer:
     def date_transform(self, train_ds):
         # преобразуем дату и делаем из нее колонки
         train_ds['date'] = pd.to_datetime(train_ds['date'])
-        #train_ds['year'] = train_ds['date'].dt.year
-        #train_ds['month'] = train_ds['date'].dt.month
-        #train_ds['day_of_week'] = train_ds['date'].dt.dayofweek
-        #train_ds['day'] = train_ds['date'].dt.day
-        #train_ds['day_of_year'] = train_ds['date'].dt.dayofyear
+        train_ds['year'] = train_ds['date'].dt.year
+        train_ds['month'] = train_ds['date'].dt.month
+        train_ds['day_of_week'] = train_ds['date'].dt.dayofweek
+        train_ds['day'] = train_ds['date'].dt.day
+        train_ds['day_of_year'] = train_ds['date'].dt.dayofyear
 
         return train_ds
 
@@ -89,19 +89,19 @@ class DataTransformer:
         """
         Добавление данных о праздниках из файла 'data/holidays.csv'
         """
-        df_holidays = pd.read_csv('data/holidays.csv')
-        df_holidays['date'] = pd.to_datetime(df_holidays['date'])
+        df_holidays_true = pd.read_csv('data/holidays_true.csv')
+        df_holidays_true['date'] = pd.to_datetime(df_holidays_true['date']))
         
         # Assuming df_holidays and train_ds are your dataframes
-        train_ds = pd.merge(train_ds, df_holidays, on='date', how='left')
+        train_ds = pd.merge(train_ds, df_holidays_true, on='date', how='left')
         
         # Fill NaN values with 0
-        train_ds['holidays'].fillna(0, inplace=True)
-        train_ds['preholidays'].fillna(0, inplace=True)
+        train_ds['holidays_true'].fillna(0, inplace=True)
+        train_ds['preholidays_true'].fillna(0, inplace=True)
         
         # Convert to int
-        train_ds['holidays'] = train_ds['holidays'].astype(int)
-        train_ds['preholidays'] = train_ds['preholidays'].astype(int)
+        train_ds['holidays_true'] = train_ds['holidays_true'].astype(int)
+        train_ds['preholidays_true'] = train_ds['preholidays_true'].astype(int)
 
         return train_ds
 
@@ -199,6 +199,8 @@ class DataTransformer:
         train_ds = train_ds.drop(['date_hours', 'date_tw'], axis=1)
       
         return train_ds
+    
+        
 
     def transform(self, data):
        
