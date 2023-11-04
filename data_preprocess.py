@@ -87,10 +87,10 @@ class DataTransformer:
 
     def holydays(self, train_ds):
         """
-        Добавление данных о праздниках из файла 'data/holidays.csv'
+        Добавление данных о праздниках из файла 'data/holidays_true.csv'
         """
         df_holidays_true = pd.read_csv('data/holidays_true.csv')
-        df_holidays_true['date'] = pd.to_datetime(df_holidays_true['date']))
+        df_holidays_true['date'] = pd.to_datetime(df_holidays_true['date'])
         
         # Assuming df_holidays and train_ds are your dataframes
         train_ds = pd.merge(train_ds, df_holidays_true, on='date', how='left')
@@ -216,7 +216,7 @@ class DataTransformer:
         
         FEATURE_WINDOW_SIZE = 24
         
-        feature_cols_no_date = = list(train_ds.columns)
+        feature_cols_no_date = list(train_ds.columns)
         feature_cols_no_date.remove('date')
 
         drop_list = ['target', 
